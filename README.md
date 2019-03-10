@@ -49,3 +49,6 @@ There are still a few flaws with this program in its current state, including:
 
 - The OEM Config screen uses a fully-fledged Desktop Environment, meaning some extra unneeded applications and background processes will also run in the background on the OEM Config session
 - More
+
+
+Related Repository: https://github.com/feren-OS/oem-config
