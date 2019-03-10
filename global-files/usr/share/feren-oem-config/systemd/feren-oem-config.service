@@ -1,0 +1,13 @@
+[Unit]
+Description=Feren OS OEM Setup Preparation
+ConditionFileIsExecutable=/usr/bin/feren-oem-session-prep
+Before=getty@tty1.service getty@tty2.service getty@tty3.service getty@tty4.service getty@tty5.service getty@tty6.service systemd-user-sessions.service display-manager.service
+After=network.target acpid.service acpid.socket acpid.path
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/feren-oem-session-prep
+TimeoutSec=infinity
+
+[Install]
+WantedBy=multi-user.target

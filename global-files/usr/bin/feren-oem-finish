@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    nohup "$0" e &
+else
+    echo "1" > /tmp/feren-oem-cala-complete
+fi

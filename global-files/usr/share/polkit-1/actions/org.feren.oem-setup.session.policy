@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+
+    <vendor>Feren Team</vendor>
+    <vendor_url>https://ferenos.weebly.com/</vendor_url>
+    <icon_name>distributor-logo</icon_name>
+    <action id="org.feren.oem-setup.session">
+
+        <description gettext-domain="feren-oem-setup">Feren OS OEM Setup Screen</description>
+        <message gettext-domain="feren-oem-setup">You shouldn't be seeing this authentication dialog...</message>
+        <defaults>
+            <allow_any>yes</allow_any>
+            <allow_inactive>yes</allow_inactive>
+            <allow_active>yes</allow_active>
+        </defaults>
+        <annotate key="org.freedesktop.policykit.exec.path">/usr/bin/feren-oem-session</annotate>
+        <annotate key="org.freedesktop.policykit.exec.allow_gui">true</annotate>
+
+    </action>
+
+</policyconfig>

@@ -1,0 +1,13 @@
+[org.cinnamon]
+enabled-applets=[ 'panel1:right:11:network@cinnamon.org:9', 'panel1:right:13:power@cinnamon.org:11', 'panel1:left:0:window-list@cinnamon.org:1' ]
+panels-enabled=[ '1:0:bottom' ]
+panel-edit-mode=false
+
+[org.cinnamon.desktop.lockdown]
+disable-command-line=true
+disable-lock-screen=true
+disable-log-out=true
+disable-user-switching=true
+
+[org.nemo.desktop]
+show-desktop-icons=false

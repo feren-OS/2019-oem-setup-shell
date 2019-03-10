@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#Make sure the language is properly set
+/usr/bin/feren-languagesetter
+#Remove all the restrictions and OEM Setup customisations
+rm -f /etc/lightdm/lightdm.conf.d/90-ferenoemsetup.conf /etc/dconf/db/local.d/locks/00_oemsetup-locks /usr/share/glib-2.0/schemas/10_oem-config.gschema.override /etc/dconf/profile/user /usr/local/sbin/gnome-terminal /usr/local/sbin/cinnamon-settings /usr/local/sbin/xlet-settings /usr/local/sbin/cinnamon-looking-glass /usr/local/sbin/kcmshell5 /usr/share/cinnamon/applets/sound@cinnamon.org/settings-schema.json /etc/sddm.conf.d/oem-setup.conf /etc/xdg/kdeglobals /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js
+dconf update
+glib-compile-schemas /usr/share/glib-2.0/schemas
+#This bit should be put inside of the Calamares Installer, but we need it to run once this command is running so we don't lose it, and since this command runs as a service it'll run after Calamares is done, so for now it's here.
+dpkg --purge --force-all calamares feren-calamares-oem-config feren-calamares-languagesetter
+#Get rid of the feren-oem-setup user
+sed -i 's/SystemAccount=true/SystemAccount=false/g' /var/lib/AccountsService/users/feren-oem-setup
+sudo deluser feren-oem-setup
+#Finish cleanup
+systemctl disable feren-oem-remove.service
+systemctl disable feren-oem-config.service
+systemctl disable feren-oem-preparations.service
+rm -f /etc/systemd/system/feren-oem-remove.service /etc/systemd/system/feren-oem-config.service /etc/systemd/system/feren-oem-preparations.service
+rm -rf /oem-session
+rm -f /usr/share/feren-os/oem-setup-user-made
+if [ -f /etc/feren-kdeglobals-backup ]; then
+    cp -f /etc/feren-kdeglobals-backup /etc/xdg/kdeglobals
+fi
+if [ -f /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js.bak ]; then
+    mv /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js.bak /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js
+fi
+if [ -f /usr/local/sbin/kcmshell5-backup ]; then
+    rm -f /usr/local/sbin/kcmshell5
+    mv /usr/local/sbin/kcmshell5-backup /usr/local/sbin/kcmshell5
+fi

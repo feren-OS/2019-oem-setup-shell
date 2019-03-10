@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=OEM Config
+Comment=
+Icon=distributor-logo
+Exec=/usr/bin/feren-oem-session launch
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=GNOME;GTK;System;
+X-GNOME-Autostart-enabled=true

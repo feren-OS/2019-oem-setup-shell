@@ -1,0 +1,100 @@
+#!/bin/bash
+
+adduser --disabled-password --gecos "" feren-oem-setup --home /oem-session
+sed -i 's/SystemAccount=false/SystemAccount=true/g' /var/lib/AccountsService/users/feren-oem-setup
+if [ ! -f /usr/share/feren-os/oem-setup-user-made ]; then
+if [ -f /usr/bin/cinnamon ]; then
+    #Cinnamon Restrictions + Setup Round 1
+    echo "[SeatDefaults]
+    user-session=cinnamon
+    autologin-user=feren-oem-setup
+    autologin-user-timeout=0" > /etc/lightdm/lightdm.conf.d/90-ferenoemsetup.conf
+    mkdir /etc/dconf
+    mkdir /etc/dconf/db
+    mkdir /etc/dconf/db/local.d
+    mkdir /etc/dconf/db/local.d/locks
+    echo "# prevent changes to the panel
+/org/cinnamon/enabled-applets
+/org/cinnamon/panels-enabled
+/org/cinnamon/panel-edit-mode
+
+# prevent easily escaping installer and session
+/org/cinnamon/desktop/lockdown/disable-command-line
+/org/cinnamon/desktop/lockdown/disable-lock-screen
+/org/cinnamon/desktop/lockdown/disable-log-out
+/org/cinnamon/desktop/lockdown/disable-user-switching
+/org/nemo/desktop/show-desktop-icons" > /etc/dconf/db/local.d/locks/00_oemsetup-locks
+    mkdir /etc/dconf/profile
+    echo "user-db: user
+system-db:local
+" > /etc/dconf/profile/user
+    dconf update
+    cp -f /usr/share/feren-oem-config/dconf-configs/10_oem-config.gschema.override /usr/share/glib-2.0/schemas/10_oem-config.gschema.override
+    glib-compile-schemas /usr/share/glib-2.0/schemas
+fi
+if [ -f /usr/bin/plasmashell ]; then
+    #Plasma Restrictions + Setup Round 1
+    if [ ! -d /etc/sddm.conf.d ]; then
+        mkdir /etc/sddm.conf.d
+    fi
+    /bin/echo "[Autologin]
+User=feren-oem-setup
+Session=plasma
+Relogin=true" > /etc/sddm.conf.d/oem-setup.conf
+    if [ ! -d /etc/xdg/xdg-plasma ]; then
+        mkdir /etc/xdg/xdg-plasma
+    fi
+    if [ -f /etc/xdg/kdeglobals ]; then
+        /bin/cp -f /etc/xdg/kdeglobals /etc/feren-kdeglobals-backup
+    fi
+    /bin/echo "[KDE Action Restrictions]
+action/kwin_rmb=false
+plasma/allow_configure_when_locked=false
+plasma/plasmashell/unlockedDesktop=false
+run_command=false
+action/lock_screen=false
+editable_desktop_icons=false
+action/switch_user=false
+action/start_new_session=false
+plasma/containment_actions=false
+action/configdesktop=false
+plasma-desktop/add_activities=false
+logout=false
+shell_access=false" >> /etc/xdg/kdeglobals
+    mv /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js.bak
+    cp -f /usr/share/feren-oem-config/plasma-layout/org.kde.plasma.desktop-layout.js /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js
+    if [ ! -d /oem-session/.config ]; then
+        mkdir /oem-session/.config
+    fi
+    /bin/echo "[Daemon]
+Autolock=false" > /oem-session/.config/kscreenlockerrc
+fi
+rm -rf /oem-session/.config/autostart/*.desktop
+rm -rf /oem-session/Desktop/*
+cp -f /usr/share/feren-oem-config/startup-apps/feren-oem-config.desktop /oem-session/.config/autostart/feren-oem-config.desktop
+chmod +x /oem-session/.config/autostart/feren-oem-config.desktop
+mkdir /oem-session/.feren
+echo "Codecs Theme Conky RecommendedApps" > /oem-session/.feren/oobe-complete
+if [ -f /usr/bin/cinnamon ]; then
+    #Cinnamon Restrictions Round 2
+    echo "#!/bin/bash
+zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/gnome-terminal
+    echo "#!/bin/bash
+zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/cinnamon-settings
+    echo "#!/bin/bash
+zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/xlet-settings
+    echo "#!/bin/bash
+zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/cinnamon-looking-glass
+    chmod +x /usr/local/sbin/cinnamon-looking-glass /usr/local/sbin/xlet-settings /usr/local/sbin/cinnamon-settings /usr/local/sbin/gnome-terminal
+fi
+if [ -f /usr/bin/plasmashell ]; then
+    if [ -f /usr/local/sbin/kcmshell5 ]; then
+        /bin/mv /usr/local/sbin/kcmshell5 /usr/local/sbin/kcmshell5-backup
+    fi
+    echo "#!/bin/bash
+kdialog --sorry 'Complete setup first, then you can enjoy this feature.'" > /usr/local/sbin/kcmshell5
+    chmod +x /usr/local/sbin/kcmshell5
+fi
+chown -hR feren-oem-setup:feren-oem-setup /oem-session/
+touch /usr/share/feren-os/oem-setup-user-made
+fi

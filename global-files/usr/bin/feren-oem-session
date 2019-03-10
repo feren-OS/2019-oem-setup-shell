@@ -1,0 +1,27 @@
+#!/bin/bash
+export KDE_DEBUG=0
+
+if [ "$1" = "launch" ]; then
+    pkexec /usr/bin/feren-oem-session &
+    while true; do
+        killall cinnamon-looking-glass.py nemo cinnamon-screensaver nm-connection-editor gnome-screenshot spectacle
+        sleep 1
+    done
+    exit 0
+fi
+
+while true; do
+    if [ ! -f /tmp/feren-oem-cala-complete ]; then
+        if [ -f /usr/bin/plasmashell ]; then
+            sudo calamares -style kvantum
+        else
+            sudo calamares -style gtk2
+        fi
+    else
+        break
+    fi
+done
+rm -f /tmp/feren-oem-cala-complete
+cp -f /usr/share/feren-oem-config/systemd/feren-oem-remove.service /etc/systemd/system/feren-oem-remove.service
+systemctl enable feren-oem-remove.service
+reboot
