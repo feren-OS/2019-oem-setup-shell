@@ -50,6 +50,8 @@ These are the custom user specifications given to the OEM Config User:
 There are still a few flaws with this program in its current state, including:
 
 - The OEM Config screen uses a fully-fledged Desktop Environment, meaning some extra unneeded applications and background processes will also run in the background on the OEM Config session
+- The 'oem' user is not removed until the bootup that gets OEM Setup ready for the first time to run after boot
+- The first bootup after the OEM Setup process is done takes slightly longer due to removing the OEM Setup Shell files before completing bootup...
 - More
 
 
