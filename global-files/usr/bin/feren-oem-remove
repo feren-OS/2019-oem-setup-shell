@@ -37,6 +37,8 @@ if [ -f /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.k
 fi
 
 #This bit should be put inside of the Calamares Installer, but we need it to run once this command is running so we don't lose the command before it's ran, and since this command runs as a service it'll run after Calamares is done, so for now it's here.
+#You might want to remove this line or replace it if your OS does not use DPKG
+#You'll also need to replace some of these package names otherwise with ones that work for your OS
 dpkg --purge --force-all calamares feren-calamares-oem-config feren-calamares-languagesetter
 
 #Remove all the oem-setup-shell files if you do not want to use the package removal command
