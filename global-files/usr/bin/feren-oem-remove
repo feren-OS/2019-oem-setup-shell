@@ -9,7 +9,7 @@ rm -f /etc/lightdm/lightdm.conf.d/90-ferenoemsetup.conf /etc/dconf/db/local.d/lo
 #Rewrite the restored defaults to dconf
 dconf update
 glib-compile-schemas /usr/share/glib-2.0/schemas
-#Get rid of the feren-oem-setup user
+#Just one piece of clean up before we delete the user
 sed -i 's/SystemAccount=true/SystemAccount=false/g' /var/lib/AccountsService/users/feren-oem-setup
 
 #Finish cleanup
