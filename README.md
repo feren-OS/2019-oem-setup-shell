@@ -1,6 +1,8 @@
 # OEM Config for Feren OS
 This is a project to create an OEM Config screen for Feren OS (which can be edited easily for other Linux Distributions) that makes use of Calamares (can be reprogrammed to use another application instead) and a full Desktop Environment in order to provide a elegant, complete and easy OEM Config Screen.
 
+Deployment Tutorial: https://github.com/feren-OS/oem-setup-shell/wiki/Deployment
+
 
 <h2>Supported Desktop Environment - DM Combinations:</h2>
 The following Desktop Environment - Display Manager combinations are currently supported:
