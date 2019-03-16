@@ -1,17 +1,22 @@
 #!/bin/bash
-export KDE_DEBUG=0
 
 if [ "$1" = "launch" ]; then
+    #Run the Superuser level version of feren-oem-session, aka the while true and below code
     pkexec /usr/bin/feren-oem-session &
+    #Keep making sure certain processes are not running during the OEM Setup Session
     while true; do
         killall cinnamon-looking-glass.py nemo cinnamon-screensaver nm-connection-editor gnome-screenshot spectacle
         sleep 1
     done
+    #Keep the rest of the code from running if the code escapes the loop
     exit 0
 fi
 
+#Loop infinitely
 while true; do
+    #If there is no marker yet for a successful install, start Calamares otherwise escape the loop
     if [ ! -f /tmp/feren-oem-cala-complete ]; then
+        #Feren OS with Plasma thing - Kvantum is used for Calamares's Application Style in Feren OS with Plasma, otherwise it uses gtk2 if the DE isn't Plasma
         if [ -f /usr/bin/plasmashell ]; then
             sudo calamares -style kvantum
         else
@@ -21,7 +26,10 @@ while true; do
         break
     fi
 done
+#Remove the marker now we don't need it
 rm -f /tmp/feren-oem-cala-complete
+#Install the remover service and enable it
 cp -f /usr/share/feren-oem-config/systemd/feren-oem-remove.service /etc/systemd/system/feren-oem-remove.service
 systemctl enable feren-oem-remove.service
+#Restart the system to run the service
 reboot

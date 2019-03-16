@@ -1,7 +1,4 @@
 #!/bin/bash
 
-if [ -z "$1" ]; then
-    nohup "$0" e &
-else
-    echo "1" > /tmp/feren-oem-cala-complete
-fi
+#Add a marker for feren-oem-session to indicate a successful install
+echo "1" > /tmp/feren-oem-cala-complete
