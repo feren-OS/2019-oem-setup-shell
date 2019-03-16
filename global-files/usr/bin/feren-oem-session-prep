@@ -1,14 +1,14 @@
 #!/bin/bash
 
-adduser --disabled-password --gecos "" feren-oem-setup --home /oem-session
-sed -i 's/SystemAccount=false/SystemAccount=true/g' /var/lib/AccountsService/users/feren-oem-setup
 if [ ! -f /usr/share/feren-os/oem-setup-user-made ]; then
+    if [ -f /var/log/feren-oem-session.log ]; then
+        rm -f /var/log/feren-oem-session.log
+    fi
+    adduser --disabled-password --gecos "" feren-oem-setup --home /oem-session
+    sed -i 's/SystemAccount=false/SystemAccount=true/g' /var/lib/AccountsService/users/feren-oem-setup
 if [ -f /usr/bin/cinnamon ]; then
+    desktopenvironment="cinnamon"
     #Cinnamon Restrictions + Setup Round 1
-    echo "[SeatDefaults]
-    user-session=cinnamon
-    autologin-user=feren-oem-setup
-    autologin-user-timeout=0" > /etc/lightdm/lightdm.conf.d/90-ferenoemsetup.conf
     mkdir /etc/dconf
     mkdir /etc/dconf/db
     mkdir /etc/dconf/db/local.d
@@ -33,19 +33,10 @@ system-db:local
     glib-compile-schemas /usr/share/glib-2.0/schemas
 fi
 if [ -f /usr/bin/plasmashell ]; then
+    desktopenvironment="plasma"
     #Plasma Restrictions + Setup Round 1
-    if [ ! -d /etc/sddm.conf.d ]; then
-        mkdir /etc/sddm.conf.d
-    fi
-    /bin/echo "[Autologin]
-User=feren-oem-setup
-Session=plasma
-Relogin=true" > /etc/sddm.conf.d/oem-setup.conf
     if [ ! -d /etc/xdg/xdg-plasma ]; then
         mkdir /etc/xdg/xdg-plasma
-    fi
-    if [ -f /etc/xdg/kdeglobals ]; then
-        /bin/cp -f /etc/xdg/kdeglobals /etc/feren-kdeglobals-backup
     fi
     /bin/echo "[KDE Action Restrictions]
 action/kwin_rmb=false
@@ -95,6 +86,36 @@ if [ -f /usr/bin/plasmashell ]; then
 kdialog --sorry 'Complete setup first, then you can enjoy this feature.'" > /usr/local/sbin/kcmshell5
     chmod +x /usr/local/sbin/kcmshell5
 fi
+if [ -z "$desktopenvironment" ]; then
+    #If there's no found DE, we'll just go with what is first to be found in /usr/share/xsessions instead
+    for file in /usr/share/xsessions/*; do
+        desktopenvironment=$(echo "$file" | sed 's%/usr/share/xsessions/%%g' | sed 's/.desktop//g')
+        #Exit the loop, we only needed one .desktop
+        break
+    done
+    echo "Warning: Could not find a supported desktop environment, setting the DE to the first found DE in /usr/share/xsessions: $desktopenvironment" >> /var/log/feren-oem-session.log
+fi
+#LightDM Configurations
+if [ -f /usr/sbin/lightdm ]; then
+    echo "[SeatDefaults]
+    user-session=$desktopenvironment
+    autologin-user=feren-oem-setup
+    autologin-user-timeout=0" > /etc/lightdm/lightdm.conf.d/90-ferenoemsetup.conf
+fi
+#SDDM Configurations
+elif [ -f /usr/bin/sddm ]; then
+    if [ ! -d /etc/sddm.conf.d ]; then
+        mkdir /etc/sddm.conf.d
+    fi
+    /bin/echo "[Autologin]
+User=feren-oem-setup
+Session=$desktopenvironment
+Relogin=true" > /etc/sddm.conf.d/oem-setup.conf
+else
+    echo "Warning: Could not find a supported Display Manager installed, the feren-oem-session user will not have autologin" >> /var/log/feren-oem-session.log
+fi
+#Make sure the OEM Setup User has their home folder under their ownership
 chown -hR feren-oem-setup:feren-oem-setup /oem-session/
+#Make sure this never runs again until the next time OEM Setup is ever deployed, otherwise you're going to have a bad time
 touch /usr/share/feren-os/oem-setup-user-made
 fi
