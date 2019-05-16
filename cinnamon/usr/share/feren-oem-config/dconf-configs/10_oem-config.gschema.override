@@ -6,8 +6,14 @@ panel-edit-mode=false
 [org.cinnamon.desktop.lockdown]
 disable-command-line=true
 disable-lock-screen=true
-disable-log-out=true
+disable-log-out=false
 disable-user-switching=true
 
 [org.nemo.desktop]
 show-desktop-icons=false
+
+[org.cinnamon.desktop.wm.preferences]
+num-workspaces=1
+
+[org.cinnamon.muffin]
+button-layout=:maximize

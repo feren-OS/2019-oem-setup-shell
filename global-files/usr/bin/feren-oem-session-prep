@@ -1,6 +1,7 @@
 #!/bin/bash
 
 if [ ! -f /usr/share/feren-os/oem-setup-user-made ]; then
+    plymouth display-message --text="Getting User Setup ready..."
     if [ -f /var/log/feren-oem-session.log ]; then
         rm -f /var/log/feren-oem-session.log
     fi
@@ -24,7 +25,11 @@ if [ -f /usr/bin/cinnamon ]; then
 /org/cinnamon/desktop/lockdown/disable-lock-screen
 /org/cinnamon/desktop/lockdown/disable-log-out
 /org/cinnamon/desktop/lockdown/disable-user-switching
-/org/nemo/desktop/show-desktop-icons" > /etc/dconf/db/local.d/locks/00_oemsetup-locks
+/org/nemo/desktop/show-desktop-icons
+
+# misc. changes
+/org/cinnamon/desktop/wm/preferences/num-workspaces
+/org/cinnamon/muffin/button-layout" > /etc/dconf/db/local.d/locks/00_oemsetup-locks
     mkdir /etc/dconf/profile
     echo "user-db: user
 system-db:local
@@ -43,7 +48,7 @@ if [ -f /usr/bin/plasmashell ]; then
         cp -f /etc/xdg/kdeglobals /etc/feren-kdeglobals-backup
     fi
     #Append restrictions to the kdeglobals file, or create a new one if there isn't one already
-    /bin/echo "[KDE Action Restrictions]
+    /bin/echo '[KDE Action Restrictions][$i]
 action/kwin_rmb=false
 plasma/allow_configure_when_locked=false
 plasma/plasmashell/unlockedDesktop=false
@@ -56,16 +61,33 @@ plasma/containment_actions=false
 action/configdesktop=false
 plasma-desktop/add_activities=false
 logout=false
-shell_access=false" >> /etc/xdg/kdeglobals
+shell_access=false
+
+[Theme][$i]
+name=feren-alt
+
+[org.kde.kdecoration2][$i]
+ButtonsOnLeft=M
+ButtonsOnRight=A
+
+[Desktops][$i]
+Number=1' >> /etc/xdg/kdeglobals
     #Backup the current default panel layout and install a new one just for OEM Setup User
-    mv /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js.bak
-    cp -f /usr/share/feren-oem-config/plasma-layout/org.kde.plasma.desktop-layout.js /usr/share/plasma/look-and-feel/org.feren.default/contents/layouts/org.kde.plasma.desktop-layout.js
+    mv /usr/share/plasma/layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js /usr/share/plasma/layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js.bak
+    cp -f /usr/share/feren-oem-config/plasma-layout/layout.js /usr/share/plasma/layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
     if [ ! -d /oem-session/.config ]; then
         mkdir /oem-session/.config
     fi
     #Prevent automatic locking, since the user cannot be unlocked
     /bin/echo "[Daemon]
 Autolock=false" > /oem-session/.config/kscreenlockerrc
+fi
+#This IF is just to give a different System Settings slide between Feren OS Cinnamon and Feren OS Plasma, feel free to remove this if clause if you're forking these tools for use outside of Feren OS, but remember to also remove the line for removing slide8.png from feren-oem-remove if you do so
+if [ "$desktopenvironment" = "cinnamon" ]; then
+    rm -f /etc/calamares/branding/feren/slide8.png
+    mv -f /etc/calamares/branding/feren/slide8-cinnamon.png /etc/calamares/branding/feren/slide8.png
+else
+    rm -f /etc/calamares/branding/feren/slide8-cinnamon.png
 fi
 #Clear out autostart for the user's home directory
 rm -rf /oem-session/.config/autostart/*.desktop
@@ -81,20 +103,20 @@ echo "Codecs Theme Conky RecommendedApps" > /oem-session/.feren/oobe-complete
 if [ -f /usr/bin/cinnamon ]; then
      #Make dialogs to get in the way of running commands that can get the user out of the point of focus easily
     echo "#!/bin/bash
-zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/gnome-terminal
+notify-send 'Feren OS' 'This feature is available once you have completed Setup.'" > /usr/local/sbin/gnome-terminal
     echo "#!/bin/bash
-zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/cinnamon-settings
+notify-send 'Feren OS' 'This feature is available once you have completed Setup.'" > /usr/local/sbin/cinnamon-settings
     echo "#!/bin/bash
-zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/xlet-settings
+notify-send 'Feren OS' 'This feature is available once you have completed Setup.'" > /usr/local/sbin/xlet-settings
     echo "#!/bin/bash
-zenity --error --title='Feren OS' --text='Complete setup first, then you can enjoy this feature.' --no-wrap" > /usr/local/sbin/cinnamon-looking-glass
+notify-send 'Feren OS' 'This feature is available once you have completed Setup.'" > /usr/local/sbin/cinnamon-looking-glass
     #Make these executable so they get in the way of commands running them by their command names
     chmod +x /usr/local/sbin/cinnamon-looking-glass /usr/local/sbin/xlet-settings /usr/local/sbin/cinnamon-settings /usr/local/sbin/gnome-terminal
 fi
 if [ -f /usr/bin/plasmashell ]; then
     #Make dialogs to get in the way of running commands that can get the user out of the point of focus easily
     echo "#!/bin/bash
-kdialog --sorry 'Complete setup first, then you can enjoy this feature.'" > /usr/local/sbin/kcmshell5
+kdialog --sorry 'This feature is available once you have completed Setup.'" > /usr/local/sbin/kcmshell5
     #Make this executable so they get in the way of commands running them by their command names
     chmod +x /usr/local/sbin/kcmshell5
 fi
@@ -109,6 +131,7 @@ if [ -z "$desktopenvironment" ]; then
 fi
 
 if [ -f /usr/sbin/lightdm ]; then
+    dm="lightdm"
     #LightDM Configurations
     if [ ! -d /etc/lightdm ]; then
         mkdir /etc/lightdm
@@ -122,9 +145,18 @@ if [ -f /usr/sbin/lightdm ]; then
     autologin-user=feren-oem-setup
     autologin-user-timeout=0" > /etc/lightdm/lightdm.conf.d/90-ferenoemsetup.conf
 elif [ -f /usr/bin/sddm ]; then
+    dm="sddm"
     #SDDM Configurations
     if [ ! -d /etc/sddm.conf.d ]; then
         mkdir /etc/sddm.conf.d
+    fi
+    sed -i '/Relogin=/d' /etc/sddm.conf
+    sed -i '/Session=/d' /etc/sddm.conf
+    sed -i '/User=/d' /etc/sddm.conf
+    sed -i '/Autologin/c\' /etc/sddm.conf
+    sed -i '/^$/d' /etc/sddm.conf
+    if [ -z "$(cat /etc/sddm.conf)" ]; then
+        rm /etc/sddm.conf
     fi
     #Add autologin
     /bin/echo "[Autologin]
@@ -134,8 +166,25 @@ Relogin=true" > /etc/sddm.conf.d/oem-setup.conf
 else
     echo "Warning: Could not find a supported Display Manager installed, the feren-oem-session user will not have autologin added" >> /var/log/feren-oem-session.log
 fi
+if [ "$dm" = "lightdm" ]; then
+    #Remove Manually added LightDM Configuration
+    rm -f /etc/lightdm/lightdm.conf
+    echo '#Fix for issue causing LightDM to break when autologin is ticked in the installer
+if ! grep -Fxq "[Seat:" "/etc/lightdm/lightdm.conf"; then
+    sed -i "1s/^/[Seat:*]\n/" "/etc/lightdm/lightdm.conf"
+fi' >> /usr/bin/calamares-logs-helper
+fi
+if [ ! -z "$dm" ]; then
+    sed -i "s/dmgoeshere/$dm/g" /etc/calamares/modules/displaymanager.conf
+else
+    sed -i "s/  - displaymanager/#  - displaymanager/g" /etc/calamares/settings.conf
+    echo "Warning: The OEM-Setup-added user will not have autologin" >> /var/log/feren-oem-session.log
+fi
 #Make sure the OEM Setup User has their home folder under their ownership
 chown -hR feren-oem-setup:feren-oem-setup /oem-session/
+
 #Make sure this never runs again until the next time OEM Setup is ever deployed, otherwise you're going to have a bad time
 touch /usr/share/feren-os/oem-setup-user-made
+plymouth show-message --text=""
 fi
+exit 0

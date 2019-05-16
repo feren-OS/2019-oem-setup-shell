@@ -25,11 +25,13 @@ while true; do
     else
         break
     fi
+    if [ ! -f /tmp/feren-oem-cala-complete ]; then systemctl -i poweroff; fi
 done
 #Remove the marker now we don't need it
 rm -f /tmp/feren-oem-cala-complete
 #Install the remover service and enable it
 cp -f /usr/share/feren-oem-config/systemd/feren-oem-remove.service /etc/systemd/system/feren-oem-remove.service
 systemctl enable feren-oem-remove.service
+systemctl start feren-oem-remove.service
 #Restart the system to run the service
 reboot

@@ -1,0 +1,18 @@
+#!/bin/sh
+
+root=/
+install_dir=/var/log/installer
+[ -d $install_dir ] || mkdir -p $install_dir
+
+cp /home/*/.cache/Calamares/session.log $install_dir/debug
+
+cp /var/log/syslog $install_dir/syslog
+
+gzip --stdout /var/lib/dpkg/status > $install_dir/initial-status.gz
+
+# OEM id isn't a thing, when in OEM mode ubiquity would also archive that.
+# https://github.com/calamares/calamares/issues/943
+
+chmod -v 600 $install_dir/*
+
+/usr/bin/feren-oem-finish

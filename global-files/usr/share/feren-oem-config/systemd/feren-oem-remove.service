@@ -1,12 +1,13 @@
 [Unit]
 Description=Feren OS OEM Setup Cleanup
 ConditionFileIsExecutable=/usr/bin/feren-oem-remove
-Before=getty@tty1.service getty@tty2.service getty@tty3.service getty@tty4.service getty@tty5.service getty@tty6.service systemd-user-sessions.service display-manager.service feren-oem-config.service
-After=network.target acpid.service acpid.socket acpid.path
+RequiresMountsFor=/ /bin /dev /etc /home /lib /opt /proc /run /sbin /usr /var
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/feren-oem-remove
+ExecStart=/bin/true
+ExecStop=/usr/bin/feren-oem-remove
+RemainAfterExit=true
 TimeoutSec=infinity
 
 [Install]
