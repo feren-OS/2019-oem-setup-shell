@@ -4,12 +4,20 @@ This is a project to create an OEM Config screen for Feren OS (which can be edit
 Deployment Tutorial: https://github.com/feren-OS/oem-setup-shell/wiki/Deployment
 
 
-<h2>Supported Desktop Environment - DM Combinations:</h2>
-The following Desktop Environment - Display Manager combinations are currently supported:
+<h2>Supported Desktop Environments:</h2>
+The following Desktop Environments are currently supported:
 
-- Cinnamon and LightDM
+- Cinnamon
 
-- KDE Plasma and SDDM
+- KDE Plasma
+
+
+<h2>Supported DMs:</h2>
+The following Display Managers are currently supported:
+
+- LightDM
+
+- SDDM
 
 
 <h2>How does it work?</h2>
